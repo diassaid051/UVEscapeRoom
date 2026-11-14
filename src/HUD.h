@@ -12,6 +12,7 @@ public:
     void end();                              // restore 3D state
     // x, y in pixels from the top-left corner; scale = size of one font dot in pixels
     void text(const std::string& s, float x, float y, float scale, const glm::vec3& color, float alpha = 1.0f);
+    void rect(float x, float y, float w, float h, const glm::vec4& color);   // filled rectangle
     void textCentered(const std::string& s, float y, float scale, const glm::vec3& color);
     float textWidth(const std::string& s, float scale) const { return s.size() * 6.0f * scale; }
 
