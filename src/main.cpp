@@ -16,9 +16,20 @@ static bool firstMouse = true;
 static double lastX = 0, lastY = 0;
 static int fbW = 1280, fbH = 720;
 
+static void resetGame() {                       // back to the start of the game
+    scene.reset();
+    camera.position = glm::vec3(0.0f, 1.6f, 2.5f);
+    camera.yaw = -90.0f; camera.pitch = 0.0f;
+}
+static std::string formatTime(float t) {        // mm:ss
+    char buf[16]; int s = (int)t;
+    std::snprintf(buf, sizeof(buf), "%02d:%02d", s / 60, s % 60);
+    return buf;
+}
+
 static void onMouse(GLFWwindow*, double x, double y) {
     if (firstMouse) { lastX = x; lastY = y; firstMouse = false; }
-    if (!scene.keypadOpen()) camera.rotate((float)(x - lastX), (float)(y - lastY));
+    if (!scene.keypadOpen() && !scene.finished()) camera.rotate((float)(x - lastX), (float)(y - lastY));
     lastX = x; lastY = y;
 }
 static void onResize(GLFWwindow*, int w, int h) { fbW = w; fbH = h; glViewport(0, 0, w, h); }
@@ -30,6 +41,11 @@ static void onKey(GLFWwindow* win, int key, int, int action, int) {
         else if (key == GLFW_KEY_BACKSPACE)                      scene.keypadBackspace();
         else if (key == GLFW_KEY_ENTER || key == GLFW_KEY_KP_ENTER) scene.keypadConfirm();
         else if (key == GLFW_KEY_ESCAPE)                         scene.keypadCancel();
+        return;
+    }
+    if (scene.finished()) {                        // win screen: only R (restart) and Esc (quit)
+        if (key == GLFW_KEY_R) resetGame();
+        else if (key == GLFW_KEY_ESCAPE) glfwSetWindowShouldClose(win, true);
         return;
     }
     if (key == GLFW_KEY_ESCAPE) glfwSetWindowShouldClose(win, true);
@@ -79,8 +95,9 @@ int main() {
         if (glfwGetKey(win, GLFW_KEY_D) == GLFW_PRESS) right += 1;
         if (glfwGetKey(win, GLFW_KEY_A) == GLFW_PRESS) right -= 1;
         bool sprint = glfwGetKey(win, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS;
-        if (!scene.keypadOpen()) scene.move(camera.position, camera.moveDelta(fwd, right, dt, sprint));
+        if (!scene.keypadOpen() && !scene.finished()) scene.move(camera.position, camera.moveDelta(fwd, right, dt, sprint));
         scene.update(dt);
+        scene.checkWin(camera.position);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         scene.draw(shader, camera, fbH > 0 ? (float)fbW / fbH : 1.0f);
@@ -88,6 +105,10 @@ int main() {
         // ---- 2D overlay ----
         hud.begin(fbW, fbH);
         hud.text("FPS: " + std::to_string(fps), 12, 10, 2.0f, glm::vec3(0.4f, 1.0f, 0.5f));
+        {   // game timer, top-right
+            std::string t = "TIME " + formatTime(scene.playTime());
+            hud.text(t, fbW - hud.textWidth(t, 2.5f) - 14, 10, 2.5f, glm::vec3(1.0f));
+        }
         if (showHelp) {
             const glm::vec3 c(0.9f, 0.9f, 0.95f);
             hud.text("WASD - MOVE   SHIFT - SPRINT   MOUSE - LOOK", 12, 36, 2.0f, c);
@@ -107,6 +128,14 @@ int main() {
             hud.textCentered(shown, py + 100, 9.0f, glm::vec3(0.4f, 1.0f, 0.75f));
             if (scene.keypadWrong()) hud.textCentered("WRONG CODE", py + 185, 4.0f, glm::vec3(1.0f, 0.3f, 0.3f));
             hud.textCentered("0-9 TYPE   BACKSPACE DELETE   ENTER OK   ESC CANCEL", py + 250, 2.0f, glm::vec3(0.8f));
+        }
+
+        if (scene.finished()) {                    // win screen
+            hud.rect(0, 0, (float)fbW, (float)fbH, glm::vec4(0.02f, 0.0f, 0.08f, 0.82f));
+            hud.textCentered("YOU ESCAPED!", fbH * 0.5f - 130, 12.0f, glm::vec3(0.4f, 1.0f, 0.75f));
+            hud.textCentered("TIME: " + formatTime(scene.playTime()), fbH * 0.5f + 10, 5.0f, glm::vec3(1.0f));
+            hud.textCentered("THE UV LIGHT REVEALED THE CODE. WELL DONE, DETECTIVE.", fbH * 0.5f + 90, 2.5f, glm::vec3(0.8f, 0.75f, 1.0f));
+            hud.textCentered("[R] PLAY AGAIN     [ESC] QUIT", fbH * 0.5f + 150, 3.0f, glm::vec3(1.0f, 0.9f, 0.5f));
         }
         hud.end();
         glfwSwapBuffers(win);
