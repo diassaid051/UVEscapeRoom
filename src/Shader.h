@@ -29,6 +29,7 @@ public:
     void setBool(const char* n, bool v)           const { glUniform1i(loc(n), (int)v); }
     void setFloat(const char* n, float v)         const { glUniform1f(loc(n), v); }
     void setVec2(const char* n, const glm::vec2& v) const { glUniform2fv(loc(n), 1, glm::value_ptr(v)); }
+    void setVec4(const char* n, const glm::vec4& v) const { glUniform4fv(loc(n), 1, glm::value_ptr(v)); }
     void setVec3(const char* n, const glm::vec3& v) const { glUniform3fv(loc(n), 1, glm::value_ptr(v)); }
     void setMat4(const char* n, const glm::mat4& m) const { glUniformMatrix4fv(loc(n), 1, GL_FALSE, glm::value_ptr(m)); }
 
