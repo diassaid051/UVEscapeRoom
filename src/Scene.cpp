@@ -44,6 +44,7 @@ void Scene::update(float dt) {
     approach(drawerT_, drawerOpen_ ? 1.0f : 0.0f, 2.0f);
     approach(doorT_, doorOpen_ ? 1.0f : 0.0f, 0.8f);
     if (messageTimer_ > 0) messageTimer_ -= dt;
+    if (wrongTimer_ > 0) wrongTimer_ -= dt;
 }
 
 void Scene::interact(const vec3& p) {
@@ -55,15 +56,19 @@ void Scene::interact(const vec3& p) {
     }
     else if (dist2D(3.9f, 0.0f) < 1.8f) {
         if (doorOpen_)         say("The door is already open");
-        else if (keyTaken_) { doorOpen_ = true; say("Door unlocked - run!"); }
-        else                   say("Locked. Find the key (try the UV light on the wall)");
+        else if (!keyTaken_)   say("Locked. Find the key first");
+        else if (!codeSolved_) { keypadOpen_ = true; input_.clear(); }   // key fits: now a code panel appears
+        else                   doorOpen_ = true;
     }
 }
 
 std::string Scene::hint(const vec3& p) const {
     if (messageTimer_ > 0) return message_;
     if (std::hypot(p.x - deskPos_.x, p.z - (deskPos_.z + 0.45f)) < 1.6f) return "[E] use drawer";
-    if (std::hypot(p.x - 3.9f, p.z) < 1.8f) return "[E] use door";
+    if (std::hypot(p.x - 3.9f, p.z) < 1.8f) {
+        if (doorOpen_) return "";
+        return keyTaken_ ? "[E] enter the code (look for it with the UV light)" : "[E] use door";
+    }
     return "";
 }
 
@@ -135,4 +140,25 @@ void Scene::draw(const Shader& sh, const Camera& cam, float aspect) const {
     drawItem(sh, { TRS({3.2f, 0.9f, -3.0f}, {1.2f, 1.8f, 0.8f}), white * 0.85f, woodT_, {1, 2}, 24 });
     drawItem(sh, { TRS({2.5f, 0.3f, 2.5f},  {0.6f, 0.6f, 0.6f}), white, woodT_, {1, 1}, 16 });
     drawItem(sh, { TRS({-3.0f, 0.25f, 2.8f}, {0.6f, 0.5f, 0.6f}), white * 0.9f, woodT_, {1, 1}, 16 });
+}
+
+// ---------------- code lock ----------------
+void Scene::keypadDigit(char c) {
+    if (input_.size() < correctCode_.size()) input_.push_back(c);
+}
+void Scene::keypadBackspace() {
+    if (!input_.empty()) input_.pop_back();
+}
+void Scene::keypadCancel() {
+    keypadOpen_ = false; input_.clear();
+}
+void Scene::keypadConfirm() {
+    if (input_ == correctCode_) {
+        codeSolved_ = true; keypadOpen_ = false; doorOpen_ = true; input_.clear();
+        say("Code accepted - the door is open!");
+    }
+    else {
+        input_.clear();
+        wrongTimer_ = 1.2f;                      // HUD shows WRONG CODE while this runs
+    }
 }
