@@ -3,11 +3,15 @@
 #include "Shader.h"
 #include "Camera.h"
 #include "Scene.h"
+#include "HUD.h"
 #include <iostream>
 #include <cstdio>
+#include <string>
 
 static Camera camera;
 static Scene scene;
+static HUD hud;
+static bool showHelp = true;
 static bool firstMouse = true;
 static double lastX = 0, lastY = 0;
 static int fbW = 1280, fbH = 720;
@@ -24,6 +28,7 @@ static void onKey(GLFWwindow* win, int key, int, int action, int) {
     if (key == GLFW_KEY_F) scene.flashOn = !scene.flashOn;
     if (key == GLFW_KEY_L) scene.lampOn = !scene.lampOn;
     if (key == GLFW_KEY_E) scene.interact(camera.position);
+    if (key == GLFW_KEY_H) showHelp = !showHelp;
 }
 
 int main() {
@@ -52,6 +57,7 @@ int main() {
 
     Shader shader("shaders/scene.vert", "shaders/scene.frag");
     scene.init();
+    hud.init();
     camera.position = glm::vec3(0.0f, 1.6f, 2.5f);
 
     double last = glfwGetTime(), fpsTimer = last; int frames = 0; int fps = 0;
@@ -70,14 +76,25 @@ int main() {
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         scene.draw(shader, camera, fbH > 0 ? (float)fbW / fbH : 1.0f);
+
+        // ---- 2D overlay ----
+        hud.begin(fbW, fbH);
+        hud.text("FPS: " + std::to_string(fps), 12, 10, 2.0f, glm::vec3(0.4f, 1.0f, 0.5f));
+        if (showHelp) {
+            const glm::vec3 c(0.9f, 0.9f, 0.95f);
+            hud.text("WASD - MOVE   SHIFT - SPRINT   MOUSE - LOOK", 12, 36, 2.0f, c);
+            hud.text("F - UV LIGHT   L - LAMP   E - INTERACT   H - HIDE HELP", 12, 56, 2.0f, c);
+        }
+        hud.text("+", fbW * 0.5f - 7, fbH * 0.5f - 7, 2.0f, glm::vec3(1.0f), 0.7f);   // crosshair
+        hud.textCentered(scene.hint(camera.position), fbH - 40.0f, 2.5f, glm::vec3(1.0f, 0.9f, 0.5f));
+        hud.end();
         glfwSwapBuffers(win);
 
         ++frames;
         if (now - fpsTimer >= 0.5) {                // FPS counter in the window title (R7)
             fps = (int)(frames / (now - fpsTimer)); frames = 0; fpsTimer = now;
             char title[256];
-            if (scene.escaped(camera.position)) std::snprintf(title, sizeof(title), "YOU ESCAPED!  |  FPS: %d", fps);
-            else std::snprintf(title, sizeof(title), "UV Escape Room  |  FPS: %d  |  %s", fps, scene.hint(camera.position).c_str());
+            std::snprintf(title, sizeof(title), "UV Escape Room  |  FPS: %d", fps);
             glfwSetWindowTitle(win, title);
         }
     }
