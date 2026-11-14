@@ -18,12 +18,20 @@ static int fbW = 1280, fbH = 720;
 
 static void onMouse(GLFWwindow*, double x, double y) {
     if (firstMouse) { lastX = x; lastY = y; firstMouse = false; }
-    camera.rotate((float)(x - lastX), (float)(y - lastY));
+    if (!scene.keypadOpen()) camera.rotate((float)(x - lastX), (float)(y - lastY));
     lastX = x; lastY = y;
 }
 static void onResize(GLFWwindow*, int w, int h) { fbW = w; fbH = h; glViewport(0, 0, w, h); }
 static void onKey(GLFWwindow* win, int key, int, int action, int) {
     if (action != GLFW_PRESS) return;
+    if (scene.keypadOpen()) {                      // while the code panel is open, keys go to the lock
+        if (key >= GLFW_KEY_0 && key <= GLFW_KEY_9)             scene.keypadDigit((char)('0' + key - GLFW_KEY_0));
+        else if (key >= GLFW_KEY_KP_0 && key <= GLFW_KEY_KP_9)  scene.keypadDigit((char)('0' + key - GLFW_KEY_KP_0));
+        else if (key == GLFW_KEY_BACKSPACE)                      scene.keypadBackspace();
+        else if (key == GLFW_KEY_ENTER || key == GLFW_KEY_KP_ENTER) scene.keypadConfirm();
+        else if (key == GLFW_KEY_ESCAPE)                         scene.keypadCancel();
+        return;
+    }
     if (key == GLFW_KEY_ESCAPE) glfwSetWindowShouldClose(win, true);
     if (key == GLFW_KEY_F) scene.flashOn = !scene.flashOn;
     if (key == GLFW_KEY_L) scene.lampOn = !scene.lampOn;
@@ -71,7 +79,7 @@ int main() {
         if (glfwGetKey(win, GLFW_KEY_D) == GLFW_PRESS) right += 1;
         if (glfwGetKey(win, GLFW_KEY_A) == GLFW_PRESS) right -= 1;
         bool sprint = glfwGetKey(win, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS;
-        scene.move(camera.position, camera.moveDelta(fwd, right, dt, sprint));
+        if (!scene.keypadOpen()) scene.move(camera.position, camera.moveDelta(fwd, right, dt, sprint));
         scene.update(dt);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -87,6 +95,19 @@ int main() {
         }
         hud.text("+", fbW * 0.5f - 7, fbH * 0.5f - 7, 2.0f, glm::vec3(1.0f), 0.7f);   // crosshair
         hud.textCentered(scene.hint(camera.position), fbH - 40.0f, 2.5f, glm::vec3(1.0f, 0.9f, 0.5f));
+
+        if (scene.keypadOpen()) {                  // code lock panel
+            hud.rect(0, 0, (float)fbW, (float)fbH, glm::vec4(0, 0, 0, 0.6f));
+            float pw = 640, ph = 300, px = (fbW - pw) * 0.5f, py = (fbH - ph) * 0.5f;
+            hud.rect(px - 4, py - 4, pw + 8, ph + 8, glm::vec4(0.55f, 0.45f, 1.0f, 1.0f));
+            hud.rect(px, py, pw, ph, glm::vec4(0.06f, 0.06f, 0.12f, 1.0f));
+            hud.textCentered("ENTER 4-DIGIT CODE", py + 24, 3.5f, glm::vec3(0.8f, 0.75f, 1.0f));
+            std::string shown;
+            for (size_t i = 0; i < 4; ++i) { shown += (i < scene.keypadInput().size() ? scene.keypadInput()[i] : '_'); shown += ' '; }
+            hud.textCentered(shown, py + 100, 9.0f, glm::vec3(0.4f, 1.0f, 0.75f));
+            if (scene.keypadWrong()) hud.textCentered("WRONG CODE", py + 185, 4.0f, glm::vec3(1.0f, 0.3f, 0.3f));
+            hud.textCentered("0-9 TYPE   BACKSPACE DELETE   ENTER OK   ESC CANCEL", py + 250, 2.0f, glm::vec3(0.8f));
+        }
         hud.end();
         glfwSwapBuffers(win);
 
