@@ -76,6 +76,7 @@ void HUD::begin(int screenW, int screenH) {
     shader_->use();
     shader_->setMat4("ortho", glm::ortho(0.0f, (float)w_, (float)h_, 0.0f));
     shader_->setInt("font", 0);
+    shader_->setBool("solid", false);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, atlas_);
 }
@@ -117,4 +118,17 @@ void HUD::text(const std::string& s, float x, float y, float scale, const glm::v
 
 void HUD::textCentered(const std::string& s, float y, float scale, const glm::vec3& color) {
     text(s, (w_ - textWidth(s, scale)) * 0.5f, y, scale, color);
+}
+
+void HUD::rect(float x, float y, float w, float h, const glm::vec4& color) {
+    float q[24] = { x, y, 0, 0,   x + w, y, 0, 0,   x + w, y + h, 0, 0,
+                    x, y, 0, 0,   x + w, y + h, 0, 0,   x, y + h, 0, 0 };
+    shader_->setBool("solid", true);
+    shader_->setVec4("color", color);
+    glBindVertexArray(vao_);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(q), q, GL_STREAM_DRAW);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+    shader_->setBool("solid", false);
 }
