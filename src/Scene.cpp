@@ -44,6 +44,7 @@ void Scene::update(float dt) {
     approach(drawerT_, drawerOpen_ ? 1.0f : 0.0f, 2.0f);
     approach(doorT_, doorOpen_ ? 1.0f : 0.0f, 0.8f);
     if (messageTimer_ > 0) messageTimer_ -= dt;
+    if (!finished_) playTime_ += dt;
     if (wrongTimer_ > 0) wrongTimer_ -= dt;
 }
 
@@ -161,4 +162,19 @@ void Scene::keypadConfirm() {
         input_.clear();
         wrongTimer_ = 1.2f;                      // HUD shows WRONG CODE while this runs
     }
+}
+
+// ---------------- win screen / restart ----------------
+void Scene::checkWin(const vec3& p) {
+    if (!finished_ && escaped(p)) { finished_ = true; finalTime_ = playTime_; }
+}
+
+void Scene::reset() {
+    drawerOpen_ = keyTaken_ = doorOpen_ = false;
+    keypadOpen_ = codeSolved_ = false;
+    finished_ = false;
+    drawerT_ = doorT_ = 0.0f;
+    playTime_ = finalTime_ = 0.0f;
+    messageTimer_ = wrongTimer_ = 0.0f;
+    input_.clear(); message_.clear();
 }
