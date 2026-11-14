@@ -20,6 +20,12 @@ public:
     std::string hint(const glm::vec3& playerPos) const;   // hint text shown on screen
     bool escaped(const glm::vec3& p) const { return p.x > 4.4f; }
 
+    // ---- win screen / timer ----
+    void checkWin(const glm::vec3& playerPos);   // call every frame: latches the win when the player leaves the room
+    bool finished() const { return finished_; }
+    float playTime() const { return finished_ ? finalTime_ : playTime_; }
+    void reset();                                // restart the game (lamp/flashlight settings are kept)
+
     // ---- code lock on the door ----
     bool keypadOpen() const { return keypadOpen_; }
     const std::string& keypadInput() const { return input_; }
@@ -47,6 +53,8 @@ private:
     // state
     bool drawerOpen_ = false, keyTaken_ = false, doorOpen_ = false;
     bool keypadOpen_ = false, codeSolved_ = false;
+    bool finished_ = false;
+    float playTime_ = 0.0f, finalTime_ = 0.0f;
     std::string input_;
     float wrongTimer_ = 0.0f;
     const std::string correctCode_ = "4271";   // the same digits are written in the hidden UV message
