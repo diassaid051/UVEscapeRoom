@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <string>
+#include <unordered_map>
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -34,7 +35,14 @@ public:
     void setMat4(const char* n, const glm::mat4& m) const { glUniformMatrix4fv(loc(n), 1, GL_FALSE, glm::value_ptr(m)); }
 
 private:
-    GLint loc(const char* n) const { return glGetUniformLocation(id, n); }
+    mutable std::unordered_map<std::string, GLint> cache_;   // uniform name -> location (looked up once)
+    GLint loc(const char* n) const {
+        auto it = cache_.find(n);
+        if (it != cache_.end()) return it->second;
+        GLint l = glGetUniformLocation(id, n);
+        cache_[n] = l;
+        return l;
+    }
     static std::string readFile(const std::string& path) {
         std::ifstream f(path);
         if (!f) std::cerr << "Cannot open shader file: " << path << "\n";
