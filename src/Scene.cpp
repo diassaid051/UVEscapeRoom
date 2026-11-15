@@ -18,6 +18,8 @@ void Scene::init() {
         {vec3(2.6f, 0.0f, -3.4f), vec3(3.8f, 1.8f, -2.6f)},                              // cabinet
         {vec3(2.2f, 0.0f, 2.2f),  vec3(2.8f, 0.6f, 2.8f)},                               // crate 1
         {vec3(-3.3f, 0.0f, 2.5f), vec3(-2.7f, 0.5f, 3.1f)},                              // crate 2
+        {vec3(-4.0f, 0.0f, -1.0f), vec3(-3.5f, 2.0f, 1.0f)},                            // bookshelf
+        {vec3(-3.3f, 0.0f, -2.5f), vec3(-2.7f, 0.9f, -1.9f)},                            // chair
     };
 }
 
@@ -76,7 +78,9 @@ std::string Scene::hint(const vec3& p) const {
 void Scene::drawItem(const Shader& sh, const Item& it) const {
     sh.setMat4("model", it.model);
     sh.setVec3("objColor", it.color);
-    sh.setVec2("uvScale", it.uv);
+    float density = (it.tex == floorT_ || it.tex == wallT_) ? 0.5f : 1.0f;   // texture repeats per metre
+    sh.setVec2("uvScale", vec2(density));
+    sh.setBool("worldUV", !it.hidden);                                       // the UV board keeps plain 0..1 UVs
     sh.setFloat("shininess", it.shininess);
     sh.setBool("useTex", it.tex != 0);
     sh.setBool("useHidden", it.hidden);
@@ -141,6 +145,27 @@ void Scene::draw(const Shader& sh, const Camera& cam, float aspect) const {
     drawItem(sh, { TRS({3.2f, 0.9f, -3.0f}, {1.2f, 1.8f, 0.8f}), white * 0.85f, woodT_, {1, 2}, 24 });
     drawItem(sh, { TRS({2.5f, 0.3f, 2.5f},  {0.6f, 0.6f, 0.6f}), white, woodT_, {1, 1}, 16 });
     drawItem(sh, { TRS({-3.0f, 0.25f, 2.8f}, {0.6f, 0.5f, 0.6f}), white * 0.9f, woodT_, {1, 1}, 16 });
+
+    // ---- decoration: rug, chair, bookshelf with books, painting ----
+    drawItem(sh, { TRS({0, 0.01f, 0.5f}, {3.0f, 0.02f, 2.2f}), vec3(0.45f, 0.08f, 0.10f), 0, {1, 1}, 4 });   // rug
+
+    const vec3 chair(-3.0f, 0.0f, -2.2f), chairWood(0.55f, 0.35f, 0.20f);                                   // chair
+    drawItem(sh, { TRS(chair + vec3(0, 0.45f, 0), {0.5f, 0.06f, 0.5f}), chairWood, woodT_, {1, 1}, 16 });
+    for (int sx = -1; sx <= 1; sx += 2) for (int sz = -1; sz <= 1; sz += 2)
+        drawItem(sh, { TRS(chair + vec3(0.21f * sx, 0.21f, 0.21f * sz), {0.06f, 0.42f, 0.06f}), chairWood * 0.8f, woodT_, {1, 1}, 16 });
+    drawItem(sh, { TRS(chair + vec3(0, 0.75f, 0.22f), {0.5f, 0.5f, 0.05f}), chairWood, woodT_, {1, 1}, 16 });
+
+    drawItem(sh, { TRS({-3.75f, 1.0f, 0.0f}, {0.5f, 2.0f, 2.0f}), white * 0.55f, woodT_, {1, 2}, 12 });       // bookshelf
+    auto fr = [](float x) { return x - std::floor(x); };
+    for (int row = 0; row < 3; ++row) for (int i = 0; i < 10; ++i) {                                         // books (coloured spines)
+        float f = fr(std::sin(i * 12.9898f + row * 78.233f) * 43758.5453f);
+        float h = 0.30f + 0.08f * fr(f * 5.0f);
+        vec3 col(0.30f + 0.5f * f, 0.20f + 0.5f * fr(f * 7.0f), 0.25f + 0.5f * fr(f * 13.0f));
+        drawItem(sh, { TRS({-3.475f, 0.15f + 0.6f * row + h * 0.5f + 0.2f, -0.85f + 0.19f * i}, {0.05f, h, 0.15f}), col, 0, {1, 1}, 8 });
+    }
+
+    drawItem(sh, { TRS({0, 1.7f, 3.97f}, {1.4f, 0.9f, 0.06f}), vec3(0.30f, 0.20f, 0.10f), woodT_, {1, 1}, 16 });   // painting frame
+    drawItem(sh, { TRS({0, 1.7f, 3.935f}, {1.2f, 0.7f, 0.02f}), vec3(0.15f, 0.45f, 0.50f), 0, {1, 1}, 8 });         // canvas
 }
 
 // ---------------- code lock ----------------
