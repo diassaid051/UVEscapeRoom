@@ -1,5 +1,14 @@
+# build output and IDE files
 out/
 build/
+build_test/
+x64/
 .vs/
 CMakeSettings.json
+CMakeUserPresets.json
 *.user
+*.suo
+*.obj
+*.pdb
+*.ilk
+*.exe
