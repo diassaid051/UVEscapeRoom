@@ -40,7 +40,7 @@ public:
 private:
     struct Box { glm::vec3 min, max; };
     struct Item {                       // one drawable object
-        glm::mat4 model; glm::vec3 color; GLuint tex; glm::vec2 uv;
+        glm::mat4 model; glm::vec3 color; GLuint tex; glm::vec2 uv;   // uv: legacy, ignored (tiling now follows the world size)
         float shininess; bool hidden = false, emissive = false;
     };
     void drawItem(const Shader& sh, const Item& it) const;
