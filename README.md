@@ -30,7 +30,7 @@ Run `build/Release/UVEscapeRoom.exe` (Windows) or `build/UVEscapeRoom` (Linux/ma
 The `shaders/` and `assets/` folders are copied next to the executable automatically; the program
 also switches its working directory to the executable's folder, so it can be started from anywhere.
 
-Requirements: a GPU/driver with OpenGL 3.3 core profile. Tested on: [fill in your GPU / OS].
+Requirements: a GPU/driver with OpenGL 3.3 core profile. Tested on: NVIDIA GeForce RTX 3050, Windows 11.
 
 ## Controls
 | Key | Action |
@@ -87,12 +87,12 @@ Measured in Release, 1280x720 (fill in after measuring):
 
 | Hardware | Scene | Avg FPS |
 |---|---|---|
-| [CPU / GPU] | Whole room | [ ] |
+| [CPU], NVIDIA GeForce RTX 3050, Windows 11 | Whole room, Release build | 144 (V-Sync, capped at the monitor refresh rate) |
 
 ## Team and roles
 | Name | Group | Role |
 |---|---|---|
-| [Full name] | [Group] | Everything (solo project, approved by the instructor: [Teams confirmation date]) |
+| [Full name] | [Group] | Everything (solo project; instructor's approval: [Teams confirmation date]) |
 
 ## AI Use
 AI tool used: **Claude (Anthropic)**.
@@ -102,7 +102,7 @@ What it was used for:
 - Writing the HUD module (bitmap font, text and rectangle drawing), the code lock, the win screen/timer, the room decoration and the quality pass (world-size UV tiling, uniform location cache, robust paths).
 - Help with Visual Studio / CMake / Git troubleshooting.
 
-What I changed and tested myself: [FILL IN HONESTLY: e.g. built and ran the project, adjusted positions and colours, tested every interaction, measured FPS, ...]
+What I did myself: set up the Visual Studio / CMake build and the Git/GitHub repository, integrated the code step by step, fixed build and repository problems, ran the project, tested the UV effect and every interaction (drawer, key, code lock, door, win screen, restart), and measured the FPS. [Add here anything else you changed yourself, e.g. positions, colours, texts.]
 
 I can explain every part of the code (see the code comments and the report).
 
