@@ -6,6 +6,7 @@
 #include "HUD.h"
 #include <iostream>
 #include <cstdio>
+#include <filesystem>
 #include <string>
 
 static Camera camera;
@@ -55,7 +56,15 @@ static void onKey(GLFWwindow* win, int key, int, int action, int) {
     if (key == GLFW_KEY_H) showHelp = !showHelp;
 }
 
-int main() {
+int main(int, char** argv) {
+    // Make relative paths (shaders/, assets/) work no matter where the program is started from.
+    std::error_code ec;
+    std::filesystem::current_path(std::filesystem::absolute(argv[0]).parent_path(), ec);
+    if (!std::filesystem::exists("shaders/scene.vert")) {
+        std::cerr << "ERROR: shaders/ folder not found next to the executable ("
+            << std::filesystem::current_path().string() << ")\n";
+        return -1;
+    }
     if (!glfwInit()) { std::cerr << "GLFW init failed\n"; return -1; }
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -87,6 +96,7 @@ int main() {
     double last = glfwGetTime(), fpsTimer = last; int frames = 0; int fps = 0;
     while (!glfwWindowShouldClose(win)) {
         double now = glfwGetTime(); float dt = (float)(now - last); last = now;
+        if (dt > 0.05f) dt = 0.05f;            // a long stall must not teleport the player through walls
         glfwPollEvents();
 
         float fwd = 0, right = 0;
