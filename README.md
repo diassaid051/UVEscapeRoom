@@ -87,12 +87,12 @@ Measured in Release, 1280x720 (fill in after measuring):
 
 | Hardware | Scene | Avg FPS |
 |---|---|---|
-| [CPU], NVIDIA GeForce RTX 3050, Windows 11 | Whole room, Release build | 144 (V-Sync, capped at the monitor refresh rate) |
+| Intel core i5, NVIDIA GeForce RTX 3050, Windows 11 | Whole room, Release build | 144 (V-Sync, capped at the monitor refresh rate) |
 
 ## Team and roles
 | Name | Group | Role |
 |---|---|---|
-| [Full name] | [Group] | Everything (solo project; instructor's approval: [Teams confirmation date]) |
+| Ibrahim Nygyman | SE-2430 | Solo with AI |
 
 ## AI Use
 AI tool used: **Claude (Anthropic)**.
@@ -104,7 +104,6 @@ What it was used for:
 
 What I did myself: set up the Visual Studio / CMake build and the Git/GitHub repository, integrated the code step by step, fixed build and repository problems, ran the project, tested the UV effect and every interaction (drawer, key, code lock, door, win screen, restart), and measured the FPS. [Add here anything else you changed yourself, e.g. positions, colours, texts.]
 
-I can explain every part of the code (see the code comments and the report).
 
 ## License and credits
 See [CREDITS.md](CREDITS.md).
