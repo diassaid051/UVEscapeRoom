@@ -20,6 +20,7 @@ nothing has to be installed on the machine.
 1. Install Visual Studio 2022 with the **Desktop development with C++** workload (it includes CMake).
 2. `File -> Open -> Folder...` and select the repository folder. Wait for "CMake generation finished".
 3. Choose the **x64-Release** configuration, select `UVEscapeRoom.exe` as the startup item and press Start.
+4. a GPU/driver with OpenGL 3.3 core profile. Tested on: Intel Core i5. NVIDIA GeForce RTX 3050, Windows 11.
 
 ### Command line (any OS with CMake 3.15+ and a C++17 compiler)
 ```
@@ -84,12 +85,11 @@ external/         GLFW, GLAD, GLM, stb_image
 ```
 
 ## Performance
-Measured in Release, 1280x720 (fill in after measuring):
-
+Measured in Release, 1280x720 :
 | Hardware | Scene | Avg FPS |
 |---|---|---|
-| Intel core i5, NVIDIA GeForce RTX 3050, Windows 11 | Whole room, Release build | 144 (V-Sync, capped at the monitor refresh rate) |
-
+| Intel Core i5 , NVIDIA GeForce RTX 3050, Windows 11 | Whole room, Release, 1280x720, V-Sync ON | 150 |
+| Intel Core i5 , NVIDIA GeForce RTX 3050, Windows 11 | Whole room, Release, 1280x720, V-Sync OFF | 144 |
 ## Team and roles
 | Name | Group | Role |
 |---|---|---|
