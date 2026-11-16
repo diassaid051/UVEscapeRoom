@@ -41,6 +41,7 @@ Requirements: a GPU/driver with OpenGL 3.3 core profile. Tested on: NVIDIA GeFor
 | L | Desk lamp on/off |
 | E | Interact: drawer, key, door |
 | 0-9, Backspace, Enter, Esc | Code panel: type, delete, confirm, cancel |
+| V | V-Sync on/off (to measure the real FPS) |
 | H | Show/hide the on-screen help |
 | R | Restart (on the win screen) |
 | Esc | Quit |
